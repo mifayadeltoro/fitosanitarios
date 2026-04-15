@@ -1,0 +1,288 @@
+html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>GIP — Del Toro Cazorla</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f2f4f7; --surface: #ffffff; --surface2: #f8f9fb;
+            --border: #dde1e9; --accent: #2563a8; --sidebar-bg: #1e2533; 
+            --sidebar-active: #d4a843; --text: #1a1f2e; --text-muted: #6b7280;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; }
+        
+        /* LAYOUT */
+        .shell { display: flex; min-height: 100vh; }
+        .sidebar { width: 220px; background: var(--sidebar-bg); color: #fff; position: sticky; top: 0; height: 100vh; flex-shrink: 0; }
+        .brand { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .brand-name { font-weight: 800; font-size: 14px; text-transform: uppercase; color: #fff; letter-spacing: 1px; }
+        
+        .nav-item { padding: 15px 20px; font-size: 13px; color: #a0adc0; cursor: pointer; transition: 0.2s; border-left: 3px solid transparent; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .nav-item.active { background: rgba(212,168,67,0.1); color: var(--sidebar-active); border-left-color: var(--sidebar-active); font-weight: 600; }
+        
+        .main { flex: 1; padding: 25px; min-width: 0; }
+        .view { display: none; }
+        .view.active { display: block; }
+        
+        /* CARDS & FORMS */
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        h3 { margin-bottom: 15px; font-size: 16px; border-bottom: 2px solid var(--bg); padding-bottom: 8px; }
+        .form-grid { display: grid; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
+        input, select, textarea { padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 14px; }
+        
+        /* SECTORES Y VÁLVULAS */
+        .finca-label { width: 100%; font-size: 11px; color: var(--accent); font-weight: 800; margin-top: 15px; border-bottom: 1px solid var(--border); padding-bottom: 4px; text-transform: uppercase; }
+        .pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .pill { padding: 8px 14px; background: #fff; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .pill.active { background: var(--sidebar-active); color: #000; border-color: var(--sidebar-active); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        /* BOTONES */
+        .btn-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .btn-pdf { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+        .btn-add { background: #fff; color: var(--accent); border: 1px dashed var(--accent); margin-bottom: 10px; }
+
+        /* TABLAS */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; padding: 12px; background: var(--surface2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid var(--border); }
+        .p-total { font-weight: 700; color: var(--accent); font-size: 15px; }
+
+        /* IMPRESIÓN */
+        @media print {
+            .sidebar, .btn-row, .btn, .nav-item { display: none !important; }
+            .main { padding: 0; }
+            .card { border: 1px solid #ddd; box-shadow: none; break-inside: avoid; }
+            .view { display: block !important; }
+            body { background: #fff; }
+        }
+
+        /* MÓVIL */
+        @media (max-width: 768px) {
+            .shell { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; }
+            .nav-item { display: inline-block; padding: 10px 15px; }
+            .main { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="shell">
+    <nav class="sidebar">
+        <div class="brand"><div class="brand-name">Del Toro Cazorla</div></div>
+        <div class="nav-item active" id="nav-prog" onclick="nav('programar')">📋 Programar Tto.</div>
+        <div class="nav-item" id="nav-oper" onclick="nav('operario')">🚜 Vista Operario</div>
+    </nav>
+
+    <main class="main">
+        <div id="view-programar" class="view active">
+            <div class="btn-row">
+                <button class="btn btn-pdf" onclick="window.print()">⬇ Generar PDF Instrucciones</button>
+                <button class="btn btn-primary" onclick="activarTto()">▶ Activar para Operario</button>
+            </div>
+
+            <div class="card">
+                <h3>1. Información Técnica</h3>
+                <div class="form-grid">
+                    <div class="form-group"><label>Nº Orden</label><input type="text" id="f-num" placeholder="Ej: 102/2026"></div>
+                    <div class="form-group">
+                        <label>Cultivo</label>
+                        <select id="f-cultivo">
+                            <option>Mandarina Nadorcott</option>
+                            <option>Aguacate Hass</option>
+                            <option>Cítricos (Varios)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Tratamiento</label>
+                        <select id="f-tipo">
+                            <option>Plaguicida</option>
+                            <option>Fungicida</option>
+                            <option>Herbicida</option>
+                            <option>Nutricional / Foliar</option>
+                            <option>Fitorregulador</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Maquinaria</label><input type="text" id="f-maq" value="Atomizador 2000L"></div>
+                </div>
+                <div class="form-group" style="margin-top:15px;"><label>Observaciones Especiales</label><textarea id="f-obs" rows="2" placeholder="Ej: Aplicar solo en cara norte, evitar horas de calor..."></textarea></div>
+            </div>
+
+            <div class="card">
+                <h3>2. Sectores y Válvulas</h3>
+                <div class="pill-group">
+                    <div class="finca-label">Sector Valdemarinas</div>
+                    <div class="pill" onclick="togglePill(this)">VM · V1</div><div class="pill" onclick="togglePill(this)">VM · V2/V3</div><div class="pill" onclick="togglePill(this)">VM · V4/V5</div><div class="pill" onclick="togglePill(this)">VM · V6/V7</div>
+                    
+                    <div class="finca-label">Sector Pilar de Mogaya</div>
+                    <div class="pill" onclick="togglePill(this)">PM · V10/V11</div><div class="pill" onclick="togglePill(this)">PM · V12</div>
+                    
+                    <div class="finca-label">Sector Valdeinfanta</div>
+                    <div class="pill" onclick="togglePill(this)">VI · V9</div><div class="pill" onclick="togglePill(this)">VI · V13</div><div class="pill" onclick="togglePill(this)">VI · V14</div><div class="pill" onclick="togglePill(this)">VI · V19</div><div class="pill" onclick="togglePill(this)">VI · V42</div><div class="pill" onclick="togglePill(this)">VI · V43</div>
+                    
+                    <div class="finca-label">Sector Orejas Malas</div>
+                    <div class="pill" onclick="togglePill(this)">OM · V24</div><div class="pill" onclick="togglePill(this)">OM · V26</div><div class="pill" onclick="togglePill(this)">OM · V28</div><div class="pill" onclick="togglePill(this)">OM · V30</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>3. Productos (Dosis por 100L)</h3>
+                <button class="btn btn-add" onclick="addProd()">+ Añadir Producto</button>
+                <table>
+                    <thead><tr><th>Producto</th><th>Dosis (g-mL/100L)</th><th>Carga por Cuba (2000L)</th><th></th></tr></thead>
+                    <tbody id="prod-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-operario" class="view">
+            <div class="card" style="border-left: 6px solid var(--sidebar-active);">
+                <h2 id="op-tto-num" style="color:var(--sidebar-bg)">No hay orden activa</h2>
+                <p id="op-tto-info" style="font-size:14px; color:var(--text-muted); margin-top:5px;"></p>
+                <div class="form-group" style="margin-top:20px; max-width: 300px;">
+                    <label>Nombre del Operario / Tratador</label>
+                    <input type="text" id="op-nombre" placeholder="Escribe tu nombre">
+                </div>
+            </div>
+            <div id="op-lista-productos"></div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // URL DE TU GOOGLE SCRIPT ACTUALIZADA
+    const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbwTPGhPwfPQSNfPNTbzZgtRAkh94hyMr9yNEDmwfHGo56q4TpCxem8jN0m-wmG4QwC3Bw/exec";
+    
+    let appState = {
+        num: "",
+        cultivo: "",
+        tipoTto: "",
+        maquinaria: "",
+        observaciones: "",
+        fincas: "",
+        productos: []
+    };
+
+    function nav(view) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('view-' + view).classList.add('active');
+        if(view === 'programar') document.getElementById('nav-prog').classList.add('active');
+        else document.getElementById('nav-oper').classList.add('active');
+    }
+
+    function togglePill(el) { el.classList.toggle('active'); }
+
+    function addProd() {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" class="p-nombre" placeholder="Nombre del producto"></td>
+            <td><input type="number" class="p-dosis" value="100" oninput="recalc()"></td>
+            <td class="p-total">2000 g</td>
+            <td><button class="btn" onclick="this.closest('tr').remove(); recalc()" style="padding:5px 10px; color:red; border-color:red;">X</button></td>
+        `;
+        document.getElementById('prod-tbody').appendChild(tr);
+        recalc();
+    }
+
+    function recalc() {
+        document.querySelectorAll('#prod-tbody tr').forEach(row => {
+            const dosis = parseFloat(row.querySelector('.p-dosis').value) || 0;
+            const total = (dosis * 20).toFixed(0); // Para cubas de 2000L (Dosis * 2000 / 100)
+            row.querySelector('.p-total').innerText = total + " g/mL";
+        });
+    }
+
+    function activarTto() {
+        appState.num = document.getElementById('f-num').value;
+        appState.cultivo = document.getElementById('f-cultivo').value;
+        appState.tipoTto = document.getElementById('f-tipo').value;
+        appState.maquinaria = document.getElementById('f-maq').value;
+        appState.observaciones = document.getElementById('f-obs').value;
+        appState.fincas = Array.from(document.querySelectorAll('.pill.active')).map(p => p.innerText).join(", ");
+        
+        const rows = document.querySelectorAll('#prod-tbody tr');
+        appState.productos = Array.from(rows).map(row => ({
+            nombre: row.querySelector('.p-nombre').value,
+            teorico: row.querySelector('.p-total').innerText
+        }));
+
+        if (!appState.num) return alert("Por favor, indica el Número de Orden");
+        if (appState.productos.length === 0) return alert("Añade al menos un producto");
+
+        // Preparar Vista Operario
+        document.getElementById('op-tto-num').innerText = "Orden Activa: " + appState.num;
+        document.getElementById('op-tto-info').innerText = "TRATAMIENTO: " + appState.tipoTto + " en " + appState.cultivo + " | SECTORES: " + appState.fincas;
+        
+        const container = document.getElementById('op-lista-productos');
+        container.innerHTML = "<h3 style='margin-top:20px'>Registro de Pesos por Cuba</h3>";
+        
+        appState.productos.forEach(p => {
+            const div = document.createElement('div');
+            div.className = "card";
+            div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <strong style="font-size:16px; color:var(--accent)">${p.nombre}</strong><br>
+                        <span style="color:var(--text-muted)">Carga teórica: <b style="color:#000">${p.teorico}</b></span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div>
+                            <label>Peso Real Báscula (g)</label>
+                            <input type="number" class="op-real-input" id="real-${p.nombre}" style="width:120px; font-weight:bold; border-color:var(--accent);">
+                        </div>
+                        <button class="btn btn-primary" onclick="registrarDato('${p.nombre}', '${p.teorico}')" style="margin-top:15px;">OK</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        alert("✅ Tratamiento activado. Pásale el móvil al operario.");
+        nav('operario');
+    }
+
+    function registrarDato(nombreProd, pesoTeorico) {
+        const nombreOp = document.getElementById('op-nombre').value;
+        const pesoReal = document.getElementById('real-' + nombreProd).value;
+
+        if (!nombreOp) return alert("El operario debe poner su nombre");
+        if (!pesoReal) return alert("Indica el peso real que marca la báscula");
+
+        const datosFinales = {
+            ...appState,
+            tratador: nombreOp,
+            producto: nombreProd,
+            pesoTeorico: pesoTeorico,
+            pesoReal: pesoReal + " g"
+        };
+
+        // Enviar a Google Sheets
+        fetch(URL_GOOGLE_SHEETS, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(datosFinales)
+        }).then(() => {
+            alert("✅ Guardado en Excel: " + nombreProd);
+            document.getElementById('real-' + nombreProd).value = "";
+            document.getElementById('real-' + nombreProd).parentElement.parentElement.parentElement.style.opacity = "0.5";
+        }).catch(err => {
+            alert("Error de conexión: " + err);
+        });
+    }
+
+    // Fecha por defecto en la cabecera del navegador
+    console.log("Sistema GIP Del Toro Cazorla cargado.");
+</script>
+
+</body>
+</html>
