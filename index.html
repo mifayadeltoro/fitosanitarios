@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>GIP — Del Toro Cazorla</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f2f4f7; --surface: #ffffff; --surface2: #f8f9fb;
+            --border: #dde1e9; --accent: #2563a8; --accent-l: #e8f0fb;
+            --accent2: #b45309; --accent3: #166534; --accent4: #991b1b;
+            --sidebar-bg: #1e2533; --sidebar-active: #d4a843;
+            --text: #1a1f2e; --text-muted: #6b7280;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; line-height: 1.5; }
+        
+        /* SHELL & SIDEBAR */
+        .shell { display: flex; min-height: 100vh; }
+        .sidebar { width: 220px; background: var(--sidebar-bg); color: #fff; position: sticky; top: 0; height: 100vh; flex-shrink: 0; }
+        .brand { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .brand-name { font-weight: 800; font-size: 14px; color: #fff; text-transform: uppercase; }
+        .nav-item { padding: 12px 20px; font-size: 13px; color: #a0adc0; cursor: pointer; transition: 0.2s; border-left: 3px solid transparent; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .nav-item.active { background: rgba(212,168,67,0.1); color: var(--sidebar-active); border-left-color: var(--sidebar-active); }
+        
+        /* MAIN CONTENT */
+        .main { flex: 1; padding: 30px; min-width: 0; }
+        .view { display: none; }
+        .view.active { display: block; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        
+        /* FORM & TABLES */
+        .form-grid { display: grid; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 10px; text-transform: uppercase; font-weight: 600; color: var(--text-muted); }
+        input, select, textarea { padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th { text-align: left; padding: 10px; background: var(--surface2); color: var(--text-muted); font-size: 10px; text-transform: uppercase; }
+        td { padding: 10px; border-bottom: 1px solid var(--border); }
+        
+        /* BUTTONS */
+        .btn-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .btn { padding: 10px 18px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.2s; }
+        .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .btn-pdf { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+
+        /* PILLS */
+        .pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .pill { padding: 6px 12px; background: #fff; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; cursor: pointer; }
+        .pill.active { background: var(--accent-l); border-color: var(--accent); color: var(--accent); }
+
+        /* PRINT STYLES */
+        @media print {
+            .sidebar, .btn-row, .nav-item { display: none !important; }
+            .main { padding: 0; }
+            .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+            body { background: #fff; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="shell">
+    <nav class="sidebar">
+        <div class="brand"><div class="brand-name">Del Toro Cazorla</div></div>
+        <div class="nav-item active" onclick="nav('programar', this)">📋 Programar Tto.</div>
+        <div class="nav-item" onclick="nav('operario', this)">🚜 Vista Operario</div>
+    </nav>
+
+    <main class="main">
+        <div id="view-programar" class="view active">
+            <div class="btn-row">
+                <button class="btn btn-pdf" onclick="window.print()">⬇ Generar PDF Instrucciones</button>
+                <button class="btn btn-primary" onclick="activarTto()">▶ Activar para Operario</button>
+            </div>
+
+            <div class="card">
+                <h3>Cabecera del Tratamiento</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nº Orden</label>
+                        <input type="text" id="f-num" placeholder="Ej: 96/2026">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="f-fecha">
+                    </div>
+                    <div class="form-group">
+                        <label>Cap. Atomizador (L)</label>
+                        <input type="number" id="f-atom" value="2000" oninput="recalc()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Válvulas / Fincas</h3>
+                <div class="pill-group" id="fincas-container">
+                    <div class="pill" onclick="togglePill(this)">VM V1</div>
+                    <div class="pill" onclick="togglePill(this)">VM V2/V3</div>
+                    <div class="pill" onclick="togglePill(this)">PM V10/V11</div>
+                    <div class="pill" onclick="togglePill(this)">VI V9</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Productos y Dosis</h3>
+                <button class="btn" onclick="addProd()">+ Añadir Producto</button>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Dosis (mL-g/100L)</th>
+                            <th>Gramos / Cuba completa</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prod-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-operario" class="view">
+            <div class="card">
+                <h2 id="op-tto-num">Esperando tratamiento...</h2>
+                <div class="form-group" style="margin-top:15px;">
+                    <label>Tu Nombre (Operario)</label>
+                    <input type="text" id="op
